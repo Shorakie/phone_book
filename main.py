@@ -1,5 +1,7 @@
 import argparse
 
+import colorful as cf
+
 from phone_book.app import app
 from phone_book.models import Contact
 from phone_book.utils import insert_fake
@@ -24,9 +26,11 @@ if __name__ == "__main__":
 
     # Start the app by showing main menu
     try:
+        print(f'You can skip {cf.deepSkyBlue & cf.bold | "questions"} with {cf.orange & cf.bold | "Ctrl+Z"}!')
+        print(f'You can cancel {cf.deepSkyBlue & cf.bold | "current action"} with {cf.orange & cf.bold | "Ctrl+C"}!')
         app.start()
     except KeyboardInterrupt:
         pass
 
-    print('Goodbye 👋.')
+    print(cf.lightCoral & cf.bold | 'Goodbye' ,'👋.')
 

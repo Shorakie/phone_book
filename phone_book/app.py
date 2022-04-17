@@ -10,7 +10,7 @@ import csv
 from phonenumbers.phonenumberutil import is_valid_number
 
 from .settings import db
-from .validators import PhoneNumberValidator, UniqueValidator
+from .validators import PhoneNumberValidator, RegexValidator, UniqueValidator
 from .models import Contact
 
 
@@ -35,10 +35,18 @@ class App:
             mandatory_message='Please select an action',
         ).execute()
 
-    def edit_contact(self, contact=Contact(name='', phone_number='', description=''), new=False):
-        contact.name = inquirer.text(
-            message='Contact name 🧑:',
-            default=contact.name,
+    def edit_contact(self, contact=Contact(first_name='', last_name=None, phone_number='', email=None, description=None), new=False):
+        contact.first_name = inquirer.text(
+            message='Contact first name 🧑:',
+            default=contact.first_name,
+            validate=lambda result: len(result) <=64 and len(result) >= 2,
+            invalid_message="Name length should be between 2 and 64",
+        ).execute()
+
+        contact.last_name = inquirer.text(
+            message='Contact last name 🧑:',
+            default=contact.last_name if contact.last_name else '',
+            mandatory=False,
             validate=lambda result: len(result) <=64 and len(result) >= 2,
             invalid_message="Name length should be between 2 and 64",
         ).execute()
@@ -55,9 +63,16 @@ class App:
             filter=lambda result: format_number(parse_phone_number(result, 'IR'), PhoneNumberFormat.E164),
         ).execute()
 
+        contact.email = inquirer.text(
+            message='Contact Email 📧:',
+            default=contact.email if contact.email else '',
+            mandatory=False,
+            validate=RegexValidator(regex=r"^[-\w\.]+@([\w-]+\.)+[\w-]{2,4}$"),
+        ).execute()
+
         contact.description = inquirer.text(
             message='Description about contact 📃:',
-            default=contact.description,
+            default=contact.description if contact.description else '',
             mandatory=False,
             multiline=True,
         ).execute()
@@ -71,7 +86,7 @@ class App:
             ]
 
         action = 'NEW_CONT_EDIT'
-        contact = Contact(name='', phone_number='', description='')
+        contact = Contact(first_name='', last_name='', phone_number='', email='', description='')
         while action == 'NEW_CONT_EDIT':
             self.edit_contact(contact, new=True)
             print(contact)
@@ -88,7 +103,7 @@ class App:
         action = 'SEARCH_AGAIN'
         while action == 'SEARCH_AGAIN':
             # Select a contact
-            choices = [Choice(contact, name=f"{contact.name}: {contact.phone_number}") for contact in Contact.select().order_by(Contact.name.asc())]
+            choices = [Choice(contact, name=f"{contact.name}: {contact.phone_number}") for contact in Contact.select().order_by(Contact.last_name.asc(), Contact.first_name.asc())]
             if len(choices) == 0:
                 print(f'{cf.bold & cf.red | "Error:"} There are no contacts in Database❗')
                 break
@@ -130,7 +145,7 @@ class App:
                 'name': c.name,
                 'phone_number': c.phone_number,
                 'description': c.description
-            } for c in Contact.select().order_by(Contact.name.asc())]
+            } for c in Contact.select().order_by(Contact.last_name.asc(), Contact.first_name.asc())]
 
         export_path = inquirer.filepath(
             message='Enter file path to export:',
@@ -225,3 +240,4 @@ class App:
             # print('\33[H\33[J', end='')
 
 app = App()
+
