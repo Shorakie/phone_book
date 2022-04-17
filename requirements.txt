@@ -8,6 +8,4 @@ inquirerpy==0.3.3
     wcwidth==0.2.5
 peewee==3.14.10
 phonenumberslite==8.12.46
-setuptools==44.0.0
 smart-getenv==1.1.0
-wheel==0.37.1
