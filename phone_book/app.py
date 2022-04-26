@@ -103,7 +103,8 @@ class App:
         action = 'SEARCH_AGAIN'
         while action == 'SEARCH_AGAIN':
             # Select a contact
-            choices = [Choice(contact, name=f"{contact.name}: {contact.phone_number}") for contact in Contact.select().order_by(Contact.last_name.asc(), Contact.first_name.asc())]
+            choices = [Choice(contact, name=f"{contact.name}: {contact.phone_number} @ {contact.email or 'No email'}")
+                for contact in Contact.select().order_by(Contact.last_name.asc(), Contact.first_name.asc())]
             if len(choices) == 0:
                 print(f'{cf.bold & cf.red | "Error:"} There are no contacts in Database❗')
                 break
